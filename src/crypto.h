@@ -1,6 +1,6 @@
 #ifndef CRYPTO_H
 #define CRYPTO_H
-
+#include <string>
 #include <vector>
 #include <array>
 #include <cstdint>
