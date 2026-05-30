@@ -9,7 +9,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Install Qt
@@ -23,6 +23,11 @@ jobs:
       - name: Build
         run: cmake --build build --config Release
 
+      - name: Find EXE
+        shell: powershell
+        run: |
+          Get-ChildItem -Recurse build -Filter *.exe
+
       - name: Deploy Qt
         shell: powershell
         run: |
@@ -35,22 +40,15 @@ jobs:
 
           Write-Host "Found EXE: $($exe.FullName)"
 
-          $windeployqt = Get-ChildItem -Recurse $env:Qt6_DIR\..\..\ -Filter windeployqt.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-
-          if (-not $windeployqt) {
-            $windeployqt = "windeployqt"
-          } else {
-            $windeployqt = $windeployqt.FullName
-          }
-
-          & $windeployqt $exe.FullName
+          windeployqt --release $exe.FullName
 
       - name: Package
         shell: powershell
         run: |
           Compress-Archive `
             -Path build/Release/* `
-            -DestinationPath MeandrCipher-Windows.zip
+            -DestinationPath MeandrCipher-Windows.zip `
+            -Force
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
